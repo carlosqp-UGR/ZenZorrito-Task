@@ -1,8 +1,12 @@
 # author: Carlos Quesada Pérez
 # date: 13/10/2023
 import csv
+import logging
 from enum import Enum
 from datetime import datetime
+
+# Set up logging
+logging.basicConfig(filename='error.log', level=logging.ERROR)
 
 ### Read data
 
@@ -39,19 +43,21 @@ with open(csv_file, 'r', encoding='utf-8') as file:
         # 2. It has an empty required field
         # 3. It doesn't have any data
 
-        # Check if the row has less fields than expected
-        if len(line) < len(FieldNames):
-            print("\tError 1: Line could not be processed (" + str(line)  + ")" )
-        # Check if any required field is empty
-        elif not line[FieldNames.STREET.value] or not line[FieldNames.ZIP.value] or not line[FieldNames.CITY.value] or not line[FieldNames.LAST_CHECK_IN_DATE.value] or not line[FieldNames.COMPANY.value] :
-            print("\tError 23: Line could not be processed (" + str(line)  + ")" )
-        # Process data
-        else :
-            data.append(line)
+        try:
+            # Check if the row has less fields than expected
+            if len(line) < len(FieldNames):
+                raise Exception("Line could not be processed - Less fields than expected ({})".format(line))                
+            # Check if any required field is empty
+            elif not line[FieldNames.STREET.value] or not line[FieldNames.ZIP.value] or not line[FieldNames.CITY.value] or not line[FieldNames.LAST_CHECK_IN_DATE.value] or not line[FieldNames.COMPANY.value] :
+                raise Exception("Line could not be processed - Required field is empty ({})".format(line))
+            # Process data
+            else :
+                data.append(line)
+        except Exception as e:
+            logging.error(str(e))
 
 # Close the CSV file
 file.close()
-
 
 ### Analysise processed data
 
